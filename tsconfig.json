@@ -1,0 +1,24 @@
+{
+  "files": [],
+  "references": [
+    { "path": "./tsconfig.app.json" },
+    { "path": "./tsconfig.node.json" }
+  ],
+  "compilerOptions": {
+    "baseUrl": ".",
+    "paths": {
+      "@raahi/assets": ["./src/assets"],
+      "@raahi/components": ["./src/components/components.ts"],
+      "@raahi/constants": ["./src/constants/constants.ts"],
+      "@raahi/pages": ["./src/pages/pages.ts"],
+      "@raahi/layouts": ["./src/layouts/layouts.ts"],
+      "@raahi/types": ["./src/types/types.ts"],
+      "@raahi/services": ["./src/services/services.ts"],
+      "@raahi/context": ["./src/context/context.ts"],
+      "@raahi/utils": ["./src/utils/utils.ts"],
+      "@raahi/hooks": ["./src/hooks/hooks.ts"],
+      "@raahi/api": ["./src/api/api.ts"],
+      "@raahi/routes": ["./src/routes/routes.ts"],
+    }
+  }
+}
