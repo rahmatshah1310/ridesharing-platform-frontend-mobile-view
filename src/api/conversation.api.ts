@@ -2,7 +2,6 @@ import { ConversationService } from "../services/services";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import type { StartConversationData, GetMessagesParams } from "../types/conversation";
 
-// Start or get conversation
 export const useStartConversationMutation = () => {
   const queryClient = useQueryClient();
   return useMutation({
