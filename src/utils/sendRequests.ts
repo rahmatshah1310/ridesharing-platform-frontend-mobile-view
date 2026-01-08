@@ -30,7 +30,6 @@ export const sendRequest = async (configs: AxiosRequestConfig) => {
 
       const errorData = error.response?.data;
 
-      // Try multiple possible error message locations
       const responseError = 
         errorData?.message || 
         errorData?.error || 
