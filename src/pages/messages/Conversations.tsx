@@ -41,7 +41,7 @@ const Conversations: React.FC = () => {
   const errorMessage = error ? (typeof error === "string" ? error : String(error)) : null;
 
   const handleDeleteConversation = (e: React.MouseEvent, conversationId: string) => {
-    e.stopPropagation(); // Prevent navigation when clicking delete
+    e.stopPropagation(); 
     setConversationToDelete(conversationId);
     setDeleteDialogOpen(true);
   };
