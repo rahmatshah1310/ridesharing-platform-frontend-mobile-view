@@ -6,9 +6,15 @@ import { Card, CardContent } from "../../components/ui/card";
 import { Button } from "../../components/ui/button";
 import { CommonInput } from "../../components/components";
 import { ArrowLeft, Send, User, MapPin, Calendar, Trash2 } from "lucide-react";
-import { useGetConversationMessages, useDeleteMessageMutation } from "../../api/api";
+import {
+  useGetConversationMessages,
+  useDeleteMessageMutation,
+} from "../../api/api";
 import { ROUTES } from "../../constants/routes";
-import type { Message, ConversationMessagesResponse } from "../../types/conversation";
+import type {
+  Message,
+  ConversationMessagesResponse,
+} from "../../types/conversation";
 import { useQueryClient } from "@tanstack/react-query";
 import { ConfirmDialog } from "../../components/components";
 import { toast } from "react-toastify";
@@ -17,8 +23,16 @@ const Chat: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const { userData } = useUser();
-  const { socket, isConnected, sendMessage: sendSocketMessage, markMessageAsRead, sendTypingIndicator } = useSocket();
-  const { data: conversationData, isLoading } = useGetConversationMessages(id || "");
+  const {
+    socket,
+    isConnected,
+    sendMessage: sendSocketMessage,
+    markMessageAsRead,
+    sendTypingIndicator,
+  } = useSocket();
+  const { data: conversationData, isLoading } = useGetConversationMessages(
+    id || ""
+  );
   const queryClient = useQueryClient();
   const deleteMessageMutation = useDeleteMessageMutation();
   const [message, setMessage] = useState("");
@@ -27,13 +41,21 @@ const Chat: React.FC = () => {
   const [otherUserTyping, setOtherUserTyping] = useState(false);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [messageToDelete, setMessageToDelete] = useState<string | null>(null);
+  const [typingUser, setTypingUser] = useState<{
+    name: string;
+    profileImage?: string;
+  } | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const messagesContainerRef = useRef<HTMLDivElement>(null);
   const typingTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const prevMessagesLengthRef = useRef<number>(0);
   const shouldAutoScrollRef = useRef<boolean>(true);
+  const typingHideRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  console.log();
 
-  const conversationDataTyped = conversationData as ConversationMessagesResponse | undefined;
+  const conversationDataTyped = conversationData as
+    | ConversationMessagesResponse
+    | undefined;
   const conversation = conversationDataTyped?.conversation;
   const otherUser = conversation?.otherUser;
   const receiverId = typeof otherUser === "object" ? otherUser._id : otherUser;
@@ -57,7 +79,10 @@ const Chat: React.FC = () => {
     if (!messagesContainerRef.current) return true;
     const container = messagesContainerRef.current;
     const threshold = 100; // pixels from bottom
-    return container.scrollHeight - container.scrollTop - container.clientHeight < threshold;
+    return (
+      container.scrollHeight - container.scrollTop - container.clientHeight <
+      threshold
+    );
   };
 
   // Scroll to bottom only when new messages arrive and user is at/near bottom
@@ -103,29 +128,48 @@ const Chat: React.FC = () => {
           return [...prev, data];
         });
         // Mark as read if it's for current user
-        const receiverId = typeof data.receiver === "object" ? data.receiver._id : data.receiver;
+        const receiverId =
+          typeof data.receiver === "object" ? data.receiver._id : data.receiver;
         if (String(receiverId) === String(userData?._id)) {
           markMessageAsRead(data._id);
         }
       }
     };
 
-    const handleUserTyping = (data: { user_id: string; conversation: string; is_typing: boolean }) => {
-      if (data.conversation === id && data.user_id !== userData?._id) {
-        setOtherUserTyping(data.is_typing);
-        // Auto-hide typing indicator after 3 seconds
-        if (data.is_typing) {
-          setTimeout(() => setOtherUserTyping(false), 3000);
-        }
+    const handleUserTyping = (data: any) => {
+      if (data.conversation !== id) return;
+      if (data.user?.id === userData?._id) return;
+
+      if (data.is_typing) {
+        setTypingUser({
+          name:
+            data.user?.name ||
+            (typeof otherUser === "object" ? otherUser.name : "User"),
+          profileImage:
+            data.user?.profileImage ||
+            (typeof otherUser === "object"
+              ? otherUser.profileImage
+              : undefined),
+        });
+
+        if (typingHideRef.current) clearTimeout(typingHideRef.current);
+        typingHideRef.current = setTimeout(() => setTypingUser(null), 3000);
+      } else {
+        setTypingUser(null);
       }
     };
 
-    const handleMessageRead = (data: { message_id: string; read_by: string; read_at: Date }) => {
+    const handleMessageRead = (data: {
+      message_id: string;
+      read_by: string;
+      read_at: Date;
+    }) => {
       // Update message status to "read" if it's our message
       setMessages((prev) =>
         prev.map((msg) => {
           if (msg._id === data.message_id) {
-            const msgSenderId = typeof msg.sender === "object" ? msg.sender._id : msg.sender;
+            const msgSenderId =
+              typeof msg.sender === "object" ? msg.sender._id : msg.sender;
             if (String(msgSenderId) === String(userData?._id)) {
               return { ...msg, status: "read" as const };
             }
@@ -137,11 +181,18 @@ const Chat: React.FC = () => {
       queryClient.invalidateQueries({ queryKey: ["conversations"] });
     };
 
-    const handleMessageDeleted = (data: { messageId: string; conversationId: string; deletedBy: string; deletedAt: Date }) => {
+    const handleMessageDeleted = (data: {
+      messageId: string;
+      conversationId: string;
+      deletedBy: string;
+      deletedAt: Date;
+    }) => {
       if (data.conversationId === id) {
         setMessages((prev) => prev.filter((msg) => msg._id !== data.messageId));
         // Invalidate to refresh conversation data
-        queryClient.invalidateQueries({ queryKey: ["conversation", id, "messages"] });
+        queryClient.invalidateQueries({
+          queryKey: ["conversation", id, "messages"],
+        });
         queryClient.invalidateQueries({ queryKey: ["conversations"] });
       }
     };
@@ -166,8 +217,12 @@ const Chat: React.FC = () => {
       const unreadMessages: string[] = [];
 
       messages.forEach((msg) => {
-        const receiverIdStr = typeof msg.receiver === "object" ? msg.receiver._id : msg.receiver;
-        if (String(receiverIdStr) === String(userData._id) && msg.status !== "read") {
+        const receiverIdStr =
+          typeof msg.receiver === "object" ? msg.receiver._id : msg.receiver;
+        if (
+          String(receiverIdStr) === String(userData._id) &&
+          msg.status !== "read"
+        ) {
           markMessageAsRead(msg._id);
           unreadMessages.push(msg._id);
           hasUnread = true;
@@ -204,25 +259,30 @@ const Chat: React.FC = () => {
 
   const handleTyping = (value: string) => {
     setMessage(value);
+
+    if (!receiverId || !id) return;
+
     if (!isTyping) {
       setIsTyping(true);
-      sendTypingIndicator(id || "", true);
+      sendTypingIndicator(receiverId, id, true);
     }
 
-    if (typingTimeoutRef.current) {
-      clearTimeout(typingTimeoutRef.current);
-    }
+    if (typingTimeoutRef.current) clearTimeout(typingTimeoutRef.current);
 
     typingTimeoutRef.current = setTimeout(() => {
       setIsTyping(false);
-      sendTypingIndicator(id || "", false);
+      sendTypingIndicator(receiverId, id, false);
     }, 1000);
   };
 
   const formatTime = (dateString: string) => {
     if (!dateString) return "";
     const date = new Date(dateString);
-    return date.toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit", hour12: true });
+    return date.toLocaleTimeString("en-US", {
+      hour: "numeric",
+      minute: "2-digit",
+      hour12: true,
+    });
   };
 
   const handleDeleteMessage = (messageId: string) => {
@@ -238,7 +298,9 @@ const Chat: React.FC = () => {
       {
         onSuccess: () => {
           toast.success("Message deleted successfully");
-          setMessages((prev) => prev.filter((msg) => msg._id !== messageToDelete));
+          setMessages((prev) =>
+            prev.filter((msg) => msg._id !== messageToDelete)
+          );
           setMessageToDelete(null);
         },
         onError: (error: any) => {
@@ -253,7 +315,9 @@ const Chat: React.FC = () => {
       <div className="min-h-screen flex items-center justify-center p-6">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
-          <p className="text-gray-600 dark:text-gray-400">Loading conversation...</p>
+          <p className="text-gray-600 dark:text-gray-400">
+            Loading conversation...
+          </p>
         </div>
       </div>
     );
@@ -264,8 +328,13 @@ const Chat: React.FC = () => {
       <div className="min-h-screen flex items-center justify-center p-6">
         <Card>
           <CardContent className="py-12 text-center">
-            <p className="text-gray-600 dark:text-gray-400">Conversation not found</p>
-            <Button onClick={() => navigate(ROUTES.messages.list)} className="mt-4">
+            <p className="text-gray-600 dark:text-gray-400">
+              Conversation not found
+            </p>
+            <Button
+              onClick={() => navigate(ROUTES.messages.list)}
+              className="mt-4"
+            >
               Go Back
             </Button>
           </CardContent>
@@ -279,20 +348,37 @@ const Chat: React.FC = () => {
       {/* Header */}
       <div className="flex-shrink-0 bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 p-4">
         <div className="max-w-4xl mx-auto flex items-center gap-4">
-          <Button variant="ghost" size="icon" onClick={() => navigate(ROUTES.messages.list)} className="rounded-full">
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={() => navigate(ROUTES.messages.list)}
+            className="rounded-full"
+          >
             <ArrowLeft className="w-5 h-5" />
           </Button>
           <div className="flex items-center gap-3 flex-1">
             {typeof otherUser === "object" && otherUser.profileImage ? (
-              <img src={otherUser.profileImage} alt={otherUser.name} className="w-10 h-10 rounded-full object-cover" />
+              <img
+                src={otherUser.profileImage}
+                alt={otherUser.name}
+                className="w-10 h-10 rounded-full object-cover"
+              />
             ) : (
               <div className="w-10 h-10 rounded-full bg-gray-200 dark:bg-gray-700 flex items-center justify-center">
                 <User className="w-5 h-5 text-gray-400" />
               </div>
             )}
             <div>
-              <h2 className="font-semibold text-gray-900 dark:text-white">{typeof otherUser === "object" ? otherUser.name : "Unknown User"}</h2>
-              {!isConnected && <p className="text-xs text-gray-500 dark:text-gray-400">Connecting...</p>}
+              <h2 className="font-semibold text-gray-900 dark:text-white">
+                {typeof otherUser === "object"
+                  ? otherUser.name
+                  : "Unknown User"}
+              </h2>
+              {!isConnected && (
+                <p className="text-xs text-gray-500 dark:text-gray-400">
+                  Connecting...
+                </p>
+              )}
               {isConnected && <p className="text-xs text-green-500">Online</p>}
             </div>
           </div>
@@ -305,49 +391,96 @@ const Chat: React.FC = () => {
                 {conversation.ride.from} → {conversation.ride.to}
               </span>
               <Calendar className="w-3 h-3 ml-2" />
-              <span>{new Date(conversation.ride.departureTime).toLocaleDateString()}</span>
+              <span>
+                {new Date(conversation.ride.departureTime).toLocaleDateString()}
+              </span>
             </div>
           </div>
         )}
       </div>
 
       {/* Messages - Scrollable Area */}
-      <div ref={messagesContainerRef} className="flex-1 overflow-y-auto p-4 min-h-0">
+      <div
+        ref={messagesContainerRef}
+        className="flex-1 overflow-y-auto p-4 min-h-0"
+      >
         <div className="max-w-4xl mx-auto space-y-4">
           {messages.map((msg) => {
             // Determine if this message is from the current user
-            const senderId = typeof msg.sender === "object" ? msg.sender._id : msg.sender;
+            const senderId =
+              typeof msg.sender === "object" ? msg.sender._id : msg.sender;
             const currentUserId = userData?._id;
             // Convert both to strings for reliable comparison
             const isOwnMessage = String(senderId) === String(currentUserId);
 
             // Get sender name
             let senderName: string;
+            let senderProfileImage: string | undefined;
             if (isOwnMessage) {
               // Sent message - show "You" (your own message)
               senderName = "You";
             } else {
               // Received message - show sender's name (the person who sent it to you)
-              if (typeof msg.sender === "object" && msg.sender.name) {
+              if (
+                typeof msg.sender === "object" &&
+                msg.sender.name &&
+                msg.sender.profileImage
+              ) {
                 senderName = msg.sender.name;
+                senderProfileImage = msg.sender.profileImage;
               } else if (typeof otherUser === "object" && otherUser.name) {
                 // Fallback to otherUser if sender is just an ID (should be the person you're chatting with)
                 senderName = otherUser.name;
+                senderProfileImage = otherUser.profileImage;
               } else {
                 senderName = "Unknown";
               }
             }
 
             return (
-              <div key={msg._id} className={`flex ${isOwnMessage ? "justify-end" : "justify-start"} group`}>
-                <div className={`relative max-w-xs md:max-w-md px-4 py-2 rounded-lg ${isOwnMessage ? "bg-blue-600 text-white" : "bg-white dark:bg-gray-800 text-gray-900 dark:text-white"}`}>
+              <div
+                key={msg._id}
+                className={`flex ${
+                  isOwnMessage ? "justify-end" : "justify-start"
+                } group`}
+              >
+                <div
+                  className={`relative max-w-xs md:max-w-md px-4 py-2 rounded-lg ${
+                    isOwnMessage
+                      ? "bg-blue-600 text-white"
+                      : "bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
+                  }`}
+                >
                   {/* Show sender name for all messages */}
-                  <p className={`text-xs font-semibold mb-1 ${isOwnMessage ? "opacity-80" : "opacity-70"}`}>{senderName}</p>
+                  <img
+                    src={senderProfileImage || ""}
+                    className={`w-10 h-10 bg-cover`}
+                  />
+                  <p
+                    className={`text-xs font-semibold mb-1 ${
+                      isOwnMessage ? "opacity-80" : "opacity-70"
+                    }`}
+                  >
+                    {senderName}
+                  </p>
                   <p className="text-sm">{msg.text}</p>
-                  <p className={`text-xs mt-1 ${isOwnMessage ? "text-blue-100" : "text-gray-500 dark:text-gray-400"}`}>
+                  <p
+                    className={`text-xs mt-1 ${
+                      isOwnMessage
+                        ? "text-blue-100"
+                        : "text-gray-500 dark:text-gray-400"
+                    }`}
+                  >
                     {formatTime(msg.createdAt)}
-                    {isOwnMessage && msg.status === "read" && <span className="ml-1">✓✓</span>}
-                    {isOwnMessage && msg.status === "delivered" && <span className="ml-1">✓</span>}
+                    {isOwnMessage && msg.status === "read" && (
+                      <span className="ml-1 text-green-400">{msg.status}</span>
+                    )}
+                    {isOwnMessage && msg.status === "delivered" && (
+                      <span className="ml-1">{msg.status}</span>
+                    )}
+                    {isOwnMessage && msg.status === "sent" && (
+                      <span className="ml-1">{msg.status}</span>
+                    )}
                   </p>
                   {isOwnMessage && (
                     <button
@@ -362,25 +495,50 @@ const Chat: React.FC = () => {
               </div>
             );
           })}
-          {otherUserTyping && (
-            <div className="flex justify-start">
-              <div className="bg-white dark:bg-gray-800 px-4 py-2 rounded-lg">
+          {typingUser && (
+            <div className="flex justify-start items-center gap-2">
+              {typingUser.profileImage ? (
+                <img
+                  src={typingUser.profileImage}
+                  alt={typingUser.name}
+                  className="w-8 h-8 rounded-full object-cover"
+                />
+              ) : (
+                <div className="w-8 h-8 rounded-full bg-gray-200 dark:bg-gray-700 flex items-center justify-center">
+                  <User className="w-4 h-4 text-gray-400" />
+                </div>
+              )}
+
+              <div className="bg-white dark:bg-gray-800 px-3 py-2 rounded-lg">
+                <p className="text-xs text-gray-500 mb-1">
+                  {typingUser.name} is typing...
+                </p>
                 <div className="flex gap-1">
-                  <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: "0ms" }}></div>
-                  <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: "150ms" }}></div>
-                  <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: "300ms" }}></div>
+                  <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" />
+                  <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce [animation-delay:150ms]" />
+                  <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce [animation-delay:300ms]" />
                 </div>
               </div>
             </div>
           )}
+
           <div ref={messagesEndRef} />
         </div>
       </div>
 
       {/* Message Input - Fixed at Bottom */}
       <div className="flex-shrink-0 bg-white dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700 p-4">
-        <form onSubmit={handleSendMessage} className="max-w-4xl mx-auto flex gap-2">
-          <CommonInput value={message} onChange={(e) => handleTyping(e.target.value)} placeholder="Type a message..." className="flex-1 bg-gray-50 dark:bg-gray-700" disabled={!isConnected} />
+        <form
+          onSubmit={handleSendMessage}
+          className="max-w-4xl mx-auto flex gap-2"
+        >
+          <CommonInput
+            value={message}
+            onChange={(e) => handleTyping(e.target.value)}
+            placeholder="Type a message..."
+            className="flex-1 bg-gray-50 dark:bg-gray-700"
+            disabled={!isConnected}
+          />
           <Button type="submit" disabled={!message.trim() || !isConnected}>
             <Send className="w-4 h-4" />
           </Button>
