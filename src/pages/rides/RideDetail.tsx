@@ -14,6 +14,7 @@ const RideDetail: React.FC = () => {
   const navigate = useNavigate();
   const { userData } = useUser();
   const { data: ride, isLoading } = useGetRideById(id || "");
+  console.log("Ride data:", ride);
   const deleteMutation = useDeleteRideMutation();
   const cancelMutation = useCancelRideMutation();
   const updateStatusMutation = useUpdateRideStatusMutation();
