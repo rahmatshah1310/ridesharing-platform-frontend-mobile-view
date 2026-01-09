@@ -9,7 +9,7 @@ interface SocketContextType {
   isConnected: boolean;
   sendMessage: (conversationId: string, message: string, receiverId: string) => void;
   markMessageAsRead: (messageId: string) => void;
-  sendTypingIndicator: (conversationId: string, isTyping: boolean) => void;
+  sendTypingIndicator: (receiverId: string, isTyping: boolean) => void;
 }
 
 const SocketContext = createContext<SocketContextType>({
@@ -42,6 +42,7 @@ export const SocketProvider: React.FC<{ children: React.ReactNode }> = ({ childr
     // Socket typically runs on the same server as the API
     const apiUrl = import.meta.env.VITE_API_URL || "http://localhost:3000";
     const socketUrl = import.meta.env.VITE_SOCKET_URL || apiUrl;
+    console.log("Socket URL:..........", socketUrl);
 
     // Ensure we have a valid URL (remove trailing slash if present, and ensure no path)
     let cleanSocketUrl = socketUrl.replace(/\/$/, "");
@@ -68,7 +69,6 @@ export const SocketProvider: React.FC<{ children: React.ReactNode }> = ({ childr
       timeout: 20000,
       autoConnect: true,
     });
-
     socketRef.current = newSocket;
     setSocket(newSocket);
 
@@ -213,7 +213,7 @@ export const SocketProvider: React.FC<{ children: React.ReactNode }> = ({ childr
       // Handle typing indicator in chat component
     });
 
-    // User online/offline
+    // User online/offline  
     newSocket.on("userOnline", (data: any) => {
       console.log("User online:", data);
       // Could update user status in UI if needed
@@ -318,14 +318,16 @@ export const SocketProvider: React.FC<{ children: React.ReactNode }> = ({ childr
     });
   };
 
-  const sendTypingIndicator = (conversationId: string, isTyping: boolean) => {
-    if (!socket || !isConnected) return;
+  const sendTypingIndicator = (receiverId: string, threadId: string, isTyping: boolean) => {
+  if (!socket || !isConnected) return;
 
-    socket.emit("typing", {
-      thread_id: conversationId,
-      is_typing: isTyping,
-    });
-  };
+  socket.emit("typing", {
+    recipient_id: receiverId,
+    thread_id: threadId,
+    is_typing: isTyping,
+  });
+};
+
 
   return (
     <SocketContext.Provider
