@@ -1,0 +1,19 @@
+{
+  "cookies": [],
+  "origins": [
+    {
+      "origin": "http://localhost:5173",
+      "localStorage": [
+        {
+          "name": "accessToken",
+          "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY5NWFiYmM5YTJjNjg0NjZiMzFjNzE2ZiIsImlhdCI6MTc2ODE2ODIzMywiZXhwIjoxNzczMzUyMjMzfQ.ROTnXBBmXE4jAoV4czUa_cXJy6ok6V0vrjjZ3SIPM7k"
+        },
+        {
+          "name": "userData",
+          "value": "{\"_id\":\"695abbc9a2c68466b31c716f\",\"name\":\"New User\",\"phone\":\"03545676674\",\"role\":\"passenger\",\"status\":\"active\",\"isVerified\":false,\"isDriverApproved\":false}"
+        }
+      ]
+    }
+  ]
+}
+
