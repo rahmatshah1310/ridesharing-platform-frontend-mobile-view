@@ -1,18 +1,36 @@
 import { test, expect } from '@playwright/test';
 
-test('has title', async ({ page }) => {
-  await page.goto('https://playwright.dev/');
-
-  // Expect a title "to contain" a substring.
-  await expect(page).toHaveTitle(/Playwright/);
-});
-
-test('get started link', async ({ page }) => {
-  await page.goto('https://playwright.dev/');
-
-  // Click the get started link.
-  await page.getByRole('link', { name: 'Get started' }).click();
-
-  // Expects page to have a heading with the name of Installation.
-  await expect(page.getByRole('heading', { name: 'Installation' })).toBeVisible();
+test('test', async ({ page }) => {
+  await page.goto('http://localhost:5173/auth/login');
+  await page.getByRole('textbox', { name: 'Phone (digits only)' }).click();
+  await page.getByRole('textbox', { name: 'Phone (digits only)' }).fill('03545676674');
+  await page.getByRole('button', { name: 'Login' }).click();
+  await page.goto('http://localhost:5173/');
+  await page.getByRole('button', { name: 'Browse Rides' }).click();
+  await page.getByRole('button', { name: 'scheduled' }).click();
+  await page.getByRole('button', { name: 'in progress' }).click();
+  await page.getByRole('button', { name: 'completed' }).click();
+  await page.getByRole('button', { name: 'cancelled' }).click();
+  await page.getByRole('button', { name: 'Upcoming' }).click();
+  await page.getByText('Lahore→Mardan').click();
+  await page.getByRole('button', { name: 'Chat' }).click();
+  await page.getByRole('button').first().click();
+  await page.getByRole('button').first().click();
+  await page.getByRole('button', { name: 'Messages' }).click();
+  await page.getByText('New DriverFri').click();
+  await page.getByRole('textbox', { name: 'Type a message...' }).click();
+  await page.getByRole('textbox', { name: 'Type a message...' }).fill('new message');
+  await page.getByRole('textbox', { name: 'Type a message...' }).press('Enter');
+  await page.locator('.inline-flex.items-center.justify-center.gap-2.whitespace-nowrap.rounded-md').click();
+  await page.getByRole('button', { name: 'Delete message' }).nth(5).click();
+  await page.getByRole('button', { name: 'Delete' }).click();
+  await page.getByRole('button').first().click();
+  await page.getByRole('button').first().click();
+  await page.getByRole('button', { name: 'My Ride Requests' }).click();
+  await page.getByRole('button', { name: 'Current' }).click();
+  await page.getByRole('button', { name: 'Upcoming' }).click();
+  await page.getByRole('button', { name: 'Past' }).click();
+  await page.getByText('Jan 10, 202611:00 AM1 seat').click();
+  await page.getByRole('button').filter({ hasText: /^$/ }).click();
+  await page.getByRole('button').filter({ hasText: /^$/ }).click();
 });
