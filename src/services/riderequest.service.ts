@@ -22,7 +22,10 @@ export const createRideRequest = async (data: CreateRideRequestData) => {
 };
 
 // Request a specific ride
-export const requestSpecificRide = async (rideId: string, data: RequestSpecificRideData) => {
+export const requestSpecificRide = async (
+  rideId: string,
+  data: RequestSpecificRideData,
+) => {
   try {
     const response = await sendRequest({
       method: "POST",
@@ -51,7 +54,10 @@ export const getRideRequestById = async (id: string) => {
 };
 
 // Cancel ride request
-export const cancelRideRequest = async (id: string, data: CancelRideRequestData) => {
+export const cancelRideRequest = async (
+  id: string,
+  data: CancelRideRequestData,
+) => {
   try {
     const response = await sendRequest({
       method: "POST",
@@ -88,7 +94,9 @@ export const getPassengerRideRequests = async () => {
     });
     return response.data.data;
   } catch (error) {
-    console.log(`RideRequest Service [getPassengerRideRequests] error: ${error}`);
+    console.log(
+      `RideRequest Service [getPassengerRideRequests] error: ${error}`,
+    );
     throw error;
   }
 };
@@ -102,7 +110,9 @@ export const getPassengerPastRideRequests = async () => {
     });
     return response.data.data;
   } catch (error) {
-    console.log(`RideRequest Service [getPassengerPastRideRequests] error: ${error}`);
+    console.log(
+      `RideRequest Service [getPassengerPastRideRequests] error: ${error}`,
+    );
     throw error;
   }
 };
@@ -116,7 +126,9 @@ export const getPassengerUpcomingRideRequests = async () => {
     });
     return response.data.data;
   } catch (error) {
-    console.log(`RideRequest Service [getPassengerUpcomingRideRequests] error: ${error}`);
+    console.log(
+      `RideRequest Service [getPassengerUpcomingRideRequests] error: ${error}`,
+    );
     throw error;
   }
 };
@@ -130,7 +142,9 @@ export const getPassengerCurrentRideRequests = async () => {
     });
     return response.data.data;
   } catch (error) {
-    console.log(`RideRequest Service [getPassengerCurrentRideRequests] error: ${error}`);
+    console.log(
+      `RideRequest Service [getPassengerCurrentRideRequests] error: ${error}`,
+    );
     throw error;
   }
 };
@@ -150,7 +164,10 @@ export const getRideRequestsByRide = async (rideId: string) => {
 };
 
 // Offer a ride to ride request
-export const offerRideToRequest = async (requestId: string, data: OfferRideRequestData) => {
+export const offerRideToRequest = async (
+  requestId: string,
+  data: OfferRideRequestData,
+) => {
   try {
     const response = await sendRequest({
       method: "POST",
@@ -201,7 +218,9 @@ export const getOpenRideRequestsForDriver = async () => {
     });
     return response.data.data;
   } catch (error) {
-    console.log(`RideRequest Service [getOpenRideRequestsForDriver] error: ${error}`);
+    console.log(
+      `RideRequest Service [getOpenRideRequestsForDriver] error: ${error}`,
+    );
     throw error;
   }
 };
@@ -215,7 +234,9 @@ export const getPastRideRequestsForDriver = async () => {
     });
     return response.data.data;
   } catch (error) {
-    console.log(`RideRequest Service [getPastRideRequestsForDriver] error: ${error}`);
+    console.log(
+      `RideRequest Service [getPastRideRequestsForDriver] error: ${error}`,
+    );
     throw error;
   }
 };
@@ -229,8 +250,9 @@ export const getUpcomingRideRequestsForDriver = async () => {
     });
     return response.data.data;
   } catch (error) {
-    console.log(`RideRequest Service [getUpcomingRideRequestsForDriver] error: ${error}`);
+    console.log(
+      `RideRequest Service [getUpcomingRideRequestsForDriver] error: ${error}`,
+    );
     throw error;
   }
 };
-
