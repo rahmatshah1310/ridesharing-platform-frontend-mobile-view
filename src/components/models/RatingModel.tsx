@@ -168,5 +168,3 @@ const RatingModel: React.FC<RatingModelProps> = ({
 };
 
 export default RatingModel;
-
-`x`
