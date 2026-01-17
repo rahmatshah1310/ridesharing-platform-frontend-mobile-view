@@ -5,6 +5,7 @@ import type {
   CancelRideData,
   UpdateRideStatusData,
   GetRidesParams,
+  RatingData,
 } from "../types/rides";
 
 // Create a new ride
@@ -29,8 +30,10 @@ export const getRides = async (params?: GetRidesParams) => {
     if (params?.status) {
       queryParams.append("status", params.status);
     }
-    const url = queryParams.toString() ? `/rides?${queryParams.toString()}` : "/rides";
-    
+    const url = queryParams.toString()
+      ? `/rides?${queryParams.toString()}`
+      : "/rides";
+
     const response = await sendRequest({
       method: "GET",
       url,
@@ -101,7 +104,10 @@ export const cancelRide = async (id: string, data: CancelRideData) => {
 };
 
 // Update ride status
-export const updateRideStatus = async (id: string, data: UpdateRideStatusData) => {
+export const updateRideStatus = async (
+  id: string,
+  data: UpdateRideStatusData,
+) => {
   try {
     const response = await sendRequest({
       method: "PUT",
@@ -185,3 +191,56 @@ export const getPassengerUpcomingRides = async () => {
   }
 };
 
+export const ratingPassengerToDriver = async (id: string, data: RatingData) => {
+  try {
+    const response = await sendRequest({
+      method: "POST",
+      url: `/rides/${id}/ratings`,
+      data,
+    });
+    return response.data.data;
+  } catch (error) {
+    console.log(`Rides Service [ratingPassengerToDriver] error: ${error}`);
+    throw error;
+  }
+};
+
+export const ratingDriverToPassenger = async (id: string, data: RatingData) => {
+  try {
+    const response = await sendRequest({
+      method: "POST",
+      url: `/rides/${id}/ratings/passenger`,
+      data,
+    });
+    return response.data.data;
+  } catch (error) {
+    console.log(`Rides Service [ratingDriverToPassenger] error: ${error}`);
+    throw error;
+  }
+};
+
+export const getRatingByUserId = async (id: string) => {
+  try {
+    const response = await sendRequest({
+      method: "GET",
+      url: `/ratings/user/${id}`,
+    });
+    return response.data.data;
+  } catch (error) {
+    console.log(`Rides Service [getRatingByUserId] error: ${error}`);
+    throw error;
+  }
+};
+
+export const getGivenRatings = async () => {
+  try {
+    const response = await sendRequest({
+      method: "GET",
+      url: "/ratings/given",
+    });
+    return response.data.data;
+  } catch (error) {
+    console.log(`Rides Service [getGivenRatings] error: ${error}`);
+    throw error;
+  }
+};
