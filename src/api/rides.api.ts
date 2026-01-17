@@ -6,12 +6,13 @@ import type {
   CancelRideData,
   UpdateRideStatusData,
   GetRidesParams,
+  RatingData,
 } from "../types/rides";
 
 // Create a new ride
 export const useCreateRideMutation = () => {
   const queryClient = useQueryClient();
-  
+
   return useMutation({
     mutationFn: async (data: CreateRideData) => {
       return await RidesService.createRide(data);
@@ -43,7 +44,7 @@ export const useGetRideById = (id: string) => {
 // Update a ride
 export const useUpdateRideMutation = () => {
   const queryClient = useQueryClient();
-  
+
   return useMutation({
     mutationFn: async ({ id, data }: { id: string; data: UpdateRideData }) => {
       return await RidesService.updateRide(id, data);
@@ -59,7 +60,7 @@ export const useUpdateRideMutation = () => {
 // Delete a ride
 export const useDeleteRideMutation = () => {
   const queryClient = useQueryClient();
-  
+
   return useMutation({
     mutationFn: async (id: string) => {
       return await RidesService.deleteRide(id);
@@ -75,7 +76,7 @@ export const useDeleteRideMutation = () => {
 // Cancel a ride
 export const useCancelRideMutation = () => {
   const queryClient = useQueryClient();
-  
+
   return useMutation({
     mutationFn: async ({ id, data }: { id: string; data: CancelRideData }) => {
       return await RidesService.cancelRide(id, data);
@@ -91,9 +92,15 @@ export const useCancelRideMutation = () => {
 // Update ride status
 export const useUpdateRideStatusMutation = () => {
   const queryClient = useQueryClient();
-  
+
   return useMutation({
-    mutationFn: async ({ id, data }: { id: string; data: UpdateRideStatusData }) => {
+    mutationFn: async ({
+      id,
+      data,
+    }: {
+      id: string;
+      data: UpdateRideStatusData;
+    }) => {
       return await RidesService.updateRideStatus(id, data);
     },
     onSuccess: (_, variables) => {
@@ -144,3 +151,47 @@ export const useGetPassengerUpcomingRides = () => {
   });
 };
 
+export const useGiveRatingToDriverMutation = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async ({ id, data }: { id: string; data: RatingData }) => {
+      return await RidesService.ratingPassengerToDriver(id, data);
+    },
+    onSuccess: (_, variables) => {
+      queryClient.invalidateQueries({ queryKey: ["ride", variables.id] });
+      queryClient.invalidateQueries({ queryKey: ["rides"] });
+      queryClient.invalidateQueries({ queryKey: ["driverRides"] });
+    },
+  });
+};
+
+export const useGiveRatingToPassengerMutation = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async ({ id, data }: { id: string; data: RatingData }) => {
+      return await RidesService.ratingDriverToPassenger(id, data);
+    },
+    onSuccess: (_, variables) => {
+      queryClient.invalidateQueries({ queryKey: ["ride", variables.id] });
+      queryClient.invalidateQueries({ queryKey: ["rides"] });
+      queryClient.invalidateQueries({ queryKey: ["driverRides"] });
+    },
+  });
+};
+
+export const useGetRatingByUserId = (id: string) => {
+  return useQuery({
+    queryKey: ["ride", id],
+    queryFn: async () => await RidesService.getRatingByUserId(id),
+    enabled: !!id,
+  });
+};
+
+export const useGetGivenRatings = () => {
+  return useQuery({
+    queryKey: ["driverRides", "current"],
+    queryFn: async () => await RidesService.getGivenRatings(),
+  });
+};
