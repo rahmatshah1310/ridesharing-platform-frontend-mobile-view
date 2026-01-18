@@ -1,4 +1,10 @@
-import React, { createContext, useContext, useEffect, useRef, useState } from "react";
+import React, {
+  createContext,
+  useContext,
+  useEffect,
+  useRef,
+  useState,
+} from "react";
 import { io, Socket } from "socket.io-client";
 import { useUser } from "./UserContext";
 import { toast } from "react-toastify";
@@ -7,7 +13,11 @@ import { useQueryClient } from "@tanstack/react-query";
 interface SocketContextType {
   socket: Socket | null;
   isConnected: boolean;
-  sendMessage: (conversationId: string, message: string, receiverId: string) => void;
+  sendMessage: (
+    conversationId: string,
+    message: string,
+    receiverId: string,
+  ) => void;
   markMessageAsRead: (messageId: string) => void;
   sendTypingIndicator: (receiverId: string, isTyping: boolean) => void;
 }
@@ -20,7 +30,9 @@ const SocketContext = createContext<SocketContextType>({
   sendTypingIndicator: () => {},
 });
 
-export const SocketProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+export const SocketProvider: React.FC<{ children: React.ReactNode }> = ({
+  children,
+}) => {
   const { token, userData } = useUser();
   const [socket, setSocket] = useState<Socket | null>(null);
   const [isConnected, setIsConnected] = useState(false);
@@ -86,10 +98,12 @@ export const SocketProvider: React.FC<{ children: React.ReactNode }> = ({ childr
     newSocket.on("connect_error", (error) => {
       console.error("Socket connection error:", error.message);
       setIsConnected(false);
-      // Don't show toast for connection errors as they're expected during initial connection
       // Only show for persistent errors
       if (error.message.includes("Invalid namespace")) {
-        console.error("Socket namespace error - check if socket server is running on:", cleanSocketUrl);
+        console.error(
+          "Socket namespace error - check if socket server is running on:",
+          cleanSocketUrl,
+        );
       }
     });
 
@@ -99,13 +113,17 @@ export const SocketProvider: React.FC<{ children: React.ReactNode }> = ({ childr
       console.log("New ride available:", data);
       toast.info(`New ride available: ${data.from} → ${data.to}`);
       queryClient.invalidateQueries({ queryKey: ["rides"] });
-      queryClient.invalidateQueries({ queryKey: ["passengerRides", "upcoming"] });
+      queryClient.invalidateQueries({
+        queryKey: ["passengerRides", "upcoming"],
+      });
     });
 
     // Ride cancelled
     newSocket.on("ride:cancelled", (data: any) => {
       console.log("Ride cancelled:", data);
-      toast.warning(`Ride cancelled: ${data.cancellationReason || "No reason provided"}`);
+      toast.warning(
+        `Ride cancelled: ${data.cancellationReason || "No reason provided"}`,
+      );
       queryClient.invalidateQueries({ queryKey: ["rides"] });
       queryClient.invalidateQueries({ queryKey: ["ride", data.id] });
       queryClient.invalidateQueries({ queryKey: ["driverRides"] });
@@ -125,7 +143,9 @@ export const SocketProvider: React.FC<{ children: React.ReactNode }> = ({ childr
     newSocket.on("ride:request:new", (data: any) => {
       console.log("New ride request:", data);
       toast.info(`New ride request: ${data.from} → ${data.to}`);
-      queryClient.invalidateQueries({ queryKey: ["rideRequests", "driver", "open"] });
+      queryClient.invalidateQueries({
+        queryKey: ["rideRequests", "driver", "open"],
+      });
     });
 
     // Ride request for specific ride (for driver)
@@ -141,7 +161,9 @@ export const SocketProvider: React.FC<{ children: React.ReactNode }> = ({ childr
       console.log("Driver offered a ride:", data);
       toast.success(`Driver offered a ride for your request`);
       queryClient.invalidateQueries({ queryKey: ["rideRequests"] });
-      queryClient.invalidateQueries({ queryKey: ["rideRequest", data.requestId] });
+      queryClient.invalidateQueries({
+        queryKey: ["rideRequest", data.requestId],
+      });
     });
 
     // Offer accepted (for driver)
@@ -188,14 +210,18 @@ export const SocketProvider: React.FC<{ children: React.ReactNode }> = ({ childr
     newSocket.on("ride:request:update", (data: any) => {
       console.log("Ride request updated:", data);
       queryClient.invalidateQueries({ queryKey: ["rideRequests"] });
-      queryClient.invalidateQueries({ queryKey: ["rideRequest", data.requestId || data.id] });
+      queryClient.invalidateQueries({
+        queryKey: ["rideRequest", data.requestId || data.id],
+      });
     });
 
     // ========== MESSAGE EVENTS ==========
     // Receive new message
     newSocket.on("receiveMessage", (data: any) => {
       console.log("New message received:", data);
-      queryClient.invalidateQueries({ queryKey: ["conversation", data.conversation, "messages"] });
+      queryClient.invalidateQueries({
+        queryKey: ["conversation", data.conversation, "messages"],
+      });
       queryClient.invalidateQueries({ queryKey: ["conversations"] });
     });
 
@@ -213,7 +239,7 @@ export const SocketProvider: React.FC<{ children: React.ReactNode }> = ({ childr
       // Handle typing indicator in chat component
     });
 
-    // User online/offline  
+    // User online/offline
     newSocket.on("userOnline", (data: any) => {
       console.log("User online:", data);
       // Could update user status in UI if needed
@@ -228,7 +254,9 @@ export const SocketProvider: React.FC<{ children: React.ReactNode }> = ({ childr
     newSocket.on("message:deleted", (data: any) => {
       console.log("Message deleted:", data);
       // Invalidate conversation messages and conversations list
-      queryClient.invalidateQueries({ queryKey: ["conversation", data.conversationId, "messages"] });
+      queryClient.invalidateQueries({
+        queryKey: ["conversation", data.conversationId, "messages"],
+      });
       queryClient.invalidateQueries({ queryKey: ["conversations"] });
     });
 
@@ -236,7 +264,9 @@ export const SocketProvider: React.FC<{ children: React.ReactNode }> = ({ childr
     newSocket.on("conversation:deleted", (data: any) => {
       console.log("Conversation deleted:", data);
       // Remove conversation from cache
-      queryClient.removeQueries({ queryKey: ["conversation", data.conversationId] });
+      queryClient.removeQueries({
+        queryKey: ["conversation", data.conversationId],
+      });
       // Invalidate conversations list
       queryClient.invalidateQueries({ queryKey: ["conversations"] });
     });
@@ -251,13 +281,17 @@ export const SocketProvider: React.FC<{ children: React.ReactNode }> = ({ childr
 
     newSocket.on("driver:rejected", (data: any) => {
       console.log("Driver rejected:", data);
-      toast.error("Your driver account application was rejected. Please contact support.");
+      toast.error(
+        "Your driver account application was rejected. Please contact support.",
+      );
       queryClient.invalidateQueries({ queryKey: ["user"] });
     });
 
     newSocket.on("driver:reverification:required", (data: any) => {
       console.log("Driver reverification required:", data);
-      toast.warning("Driver reverification required. Please update your information.");
+      toast.warning(
+        "Driver reverification required. Please update your information.",
+      );
       queryClient.invalidateQueries({ queryKey: ["user"] });
     });
 
@@ -293,21 +327,29 @@ export const SocketProvider: React.FC<{ children: React.ReactNode }> = ({ childr
     };
   }, [token, userData?._id, queryClient]);
 
-  const sendMessage = (conversationId: string, message: string, receiverId: string) => {
+  const sendMessage = (
+    conversationId: string,
+    message: string,
+    receiverId: string,
+  ) => {
     if (!socket || !isConnected) {
       toast.error("Not connected to server");
       return;
     }
 
-    socket.emit("sendMessage", {
-      thread_id: conversationId,
-      receiver_id: receiverId,
-      message: message.trim(),
-    }, (response: any) => {
-      if (response?.status === "error") {
-        toast.error(response.message || "Failed to send message");
-      }
-    });
+    socket.emit(
+      "sendMessage",
+      {
+        thread_id: conversationId,
+        receiver_id: receiverId,
+        message: message.trim(),
+      },
+      (response: any) => {
+        if (response?.status === "error") {
+          toast.error(response.message || "Failed to send message");
+        }
+      },
+    );
   };
 
   const markMessageAsRead = (messageId: string) => {
@@ -318,16 +360,19 @@ export const SocketProvider: React.FC<{ children: React.ReactNode }> = ({ childr
     });
   };
 
-  const sendTypingIndicator = (receiverId: string, threadId: string, isTyping: boolean) => {
-  if (!socket || !isConnected) return;
+  const sendTypingIndicator = (
+    receiverId: string,
+    threadId: string,
+    isTyping: boolean,
+  ) => {
+    if (!socket || !isConnected) return;
 
-  socket.emit("typing", {
-    recipient_id: receiverId,
-    thread_id: threadId,
-    is_typing: isTyping,
-  });
-};
-
+    socket.emit("typing", {
+      recipient_id: receiverId,
+      thread_id: threadId,
+      is_typing: isTyping,
+    });
+  };
 
   return (
     <SocketContext.Provider
@@ -351,4 +396,3 @@ export const useSocket = () => {
   }
   return context;
 };
-
