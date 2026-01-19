@@ -234,7 +234,11 @@ const RideDetail: React.FC = () => {
           <Button
             variant="ghost"
             size="icon"
-            onClick={() => navigate(-1)}
+            onClick={() =>
+              navigate(
+                isPassenger? ROUTES.rides.browse : ROUTES.rides.myRides
+              )
+            }
             className="rounded-full"
           >
             <ArrowLeft className="w-5 h-5" />
