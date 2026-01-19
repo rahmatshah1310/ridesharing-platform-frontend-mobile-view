@@ -14,6 +14,7 @@ const Conversations: React.FC = () => {
   const navigate = useNavigate();
   const { userData } = useUser();
   const { data: conversations, isLoading, error } = useGetMyConversations();
+  console.log(conversations,"=====================>")
   const deleteConversationMutation = useDeleteConversationMutation();
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [conversationToDelete, setConversationToDelete] = useState<string | null>(null);
