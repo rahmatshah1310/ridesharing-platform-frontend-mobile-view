@@ -4,7 +4,7 @@ import { useUser } from "../context/UserContext";
 import { ROUTES } from "../constants/routes";
 
 const AuthLayout: React.FC = () => {
-  const { token, userData } = useUser();
+  const { token, userData, isLoading  } = useUser();
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -15,12 +15,12 @@ const AuthLayout: React.FC = () => {
   }, [token, userData, navigate]);
 
   // Show loading state while checking authentication
-  if (token && userData) {
+  if (isLoading || token && userData) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-gray-900 dark:border-white mx-auto mb-4"></div>
-          <p className="text-gray-600 dark:text-gray-400">Redirecting...</p>
+          {/* <p className="text-gray-600 dark:text-gray-400">Redirecting...</p> */}
         </div>
       </div>
     );
