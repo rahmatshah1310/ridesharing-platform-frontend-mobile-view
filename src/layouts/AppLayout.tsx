@@ -4,7 +4,7 @@ import { useUser } from "../context/UserContext";
 import { ROUTES } from "../constants/routes";
 
 const AppLayout: React.FC = () => {
-  const { token, userData } = useUser();
+  const { token, userData, isLoading } = useUser();
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -15,7 +15,7 @@ const AppLayout: React.FC = () => {
   }, [token, userData, navigate]);
 
   // Show loading state while checking authentication
-  if (!token || !userData) {
+  if (isLoading || !token || !userData) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
