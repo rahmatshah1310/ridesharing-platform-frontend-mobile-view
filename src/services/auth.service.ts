@@ -28,11 +28,12 @@ export const login = async (data: unknown) => {
   }
 };
 
-export const me = async () => {
+export const me = async (config?: any) => {
   try {
     const response = await sendRequest({
       method: "GET",
       url: "/auth/me",
+      ...config, // ✅ allow headers override
     });
     return response.data;
   } catch (error) {
@@ -40,5 +41,3 @@ export const me = async () => {
     throw error;
   }
 };
-
-
