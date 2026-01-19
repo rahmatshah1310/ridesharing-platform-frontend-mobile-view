@@ -28,6 +28,7 @@ const Chat: React.FC = () => {
     isConnected,
     sendMessage: sendSocketMessage,
     markMessageAsRead,
+    markConversationAsRead,
     sendTypingIndicator,
   } = useSocket();
   const { data: conversationData, isLoading } = useGetConversationMessages(
@@ -38,7 +39,6 @@ const Chat: React.FC = () => {
   const [message, setMessage] = useState("");
   const [messages, setMessages] = useState<Message[]>([]);
   const [isTyping, setIsTyping] = useState(false);
-  const [otherUserTyping, setOtherUserTyping] = useState(false);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [messageToDelete, setMessageToDelete] = useState<string | null>(null);
   const [typingUser, setTypingUser] = useState<{
@@ -51,7 +51,6 @@ const Chat: React.FC = () => {
   const prevMessagesLengthRef = useRef<number>(0);
   const shouldAutoScrollRef = useRef<boolean>(true);
   const typingHideRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-  console.log();
 
   const conversationDataTyped = conversationData as
     | ConversationMessagesResponse
@@ -101,6 +100,14 @@ const Chat: React.FC = () => {
     prevMessagesLengthRef.current = messages.length;
   }, [messages]);
 
+
+  useEffect(() => {
+  if (id && isConnected) {
+    markConversationAsRead(id);
+  }
+}, [id, isConnected, markConversationAsRead]);
+
+
   // Track scroll position to determine if user manually scrolled up
   useEffect(() => {
     const container = messagesContainerRef.current;
@@ -128,14 +135,14 @@ const Chat: React.FC = () => {
           return [...prev, data];
         });
         // Mark as read if it's for current user
-        const receiverId =
-          typeof data.receiver === "object" ? data.receiver._id : data.receiver;
-        if (String(receiverId) === String(userData?._id)) {
-          markMessageAsRead(data._id);
-        }
+       if (String(receiverId) === String(userData?._id) && id) {
+  markConversationAsRead(id);
+}
+
       }
     };
 
+    
     const handleUserTyping = (data: any) => {
       if (data.conversation !== id) return;
       if (data.user?.id === userData?._id) return;
@@ -452,10 +459,13 @@ const Chat: React.FC = () => {
                   }`}
                 >
                   {/* Show sender name for all messages */}
+                 {senderProfileImage && (
                   <img
-                    src={senderProfileImage || ""}
-                    className={`w-10 h-10 bg-cover`}
+                    src={senderProfileImage}
+                    alt={senderName}
+                    className="w-10 h-10 rounded-full object-cover"
                   />
+                 )}
                   <p
                     className={`text-xs font-semibold mb-1 ${
                       isOwnMessage ? "opacity-80" : "opacity-70"
