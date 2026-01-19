@@ -210,7 +210,6 @@ const UpdateRide: React.FC = () => {
                   </label>
                   <Controller control={control} name="time" render={({ field }) => <CommonInput {...field} className="bg-gray-50 dark:bg-gray-800" type="text" placeholder="e.g., 06:00 PM" />} />
                   {errors.time && <p className="text-red-500 text-sm mt-1">{errors.time.message}</p>}
-                  <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">Format: 06:00 PM</p>
                 </div>
               </div>
 
@@ -228,7 +227,6 @@ const UpdateRide: React.FC = () => {
                   )}
                 />
                 {errors.availableSeats && <p className="text-red-500 text-sm mt-1">{errors.availableSeats.message}</p>}
-                <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">Minimum 1, Maximum 7 seats</p>
               </div>
 
               {/* Submit Button */}
