@@ -19,7 +19,8 @@ interface SocketContextType {
     receiverId: string,
   ) => void;
   markMessageAsRead: (messageId: string) => void;
-  sendTypingIndicator: (receiverId: string, isTyping: boolean) => void;
+  markConversationAsRead: (conversationId: string) => void;
+  sendTypingIndicator: (receiverId: string, threadId: string, isTyping: boolean) => void;
 }
 
 const SocketContext = createContext<SocketContextType>({
@@ -27,6 +28,7 @@ const SocketContext = createContext<SocketContextType>({
   isConnected: false,
   sendMessage: () => {},
   markMessageAsRead: () => {},
+  markConversationAsRead: () => {},
   sendTypingIndicator: () => {},
 });
 
@@ -89,6 +91,8 @@ export const SocketProvider: React.FC<{ children: React.ReactNode }> = ({
       console.log("Socket connected:", newSocket.id);
       setIsConnected(true);
     });
+
+    // (listeners are attached per-socket instance; cleanup happens in the effect cleanup)
 
     newSocket.on("disconnect", () => {
       console.log("Socket disconnected");
@@ -226,11 +230,23 @@ export const SocketProvider: React.FC<{ children: React.ReactNode }> = ({
     });
 
     // Message read receipt
-    newSocket.on("messageRead", (data: any) => {
-      console.log("Message read:", data);
-      // Invalidate both conversation messages and conversations list to update unreadCount
-      queryClient.invalidateQueries({ queryKey: ["conversation"] });
+    // newSocket.on("messageRead", (data: any) => {
+    //   console.log("Message read:", data);
+    //   // Invalidate both conversation messages and conversations list to update unreadCount
+    //   queryClient.invalidateQueries({ queryKey: ["conversation"] });
+    //   queryClient.invalidateQueries({ queryKey: ["conversations"] });
+    // });
+
+    newSocket.on("conversationRead", (data: any) => {
+      console.log("Conversation read:", data);
       queryClient.invalidateQueries({ queryKey: ["conversations"] });
+
+      // Optional: if you're on that conversation screen, refresh messages too
+      if (data?.thread_id) {
+        queryClient.invalidateQueries({
+          queryKey: ["conversation", data.thread_id, "messages"],
+        });
+      }
     });
 
     // User typing indicator
@@ -352,12 +368,35 @@ export const SocketProvider: React.FC<{ children: React.ReactNode }> = ({
     );
   };
 
+  // const markMessageAsRead = (id: string) => {
+  //   if (!socket || !isConnected) return;
+
+  // socket.emit("markConversationAsRead", { thread_id: id });
+  // };
+
   const markMessageAsRead = (messageId: string) => {
     if (!socket || !isConnected) return;
+    // Backend event name may vary; this keeps Chat.tsx functional and avoids undefined calls.
+    socket.emit("markMessageAsRead", { message_id: messageId });
+  };
 
-    socket.emit("markAsRead", {
-      message_id: messageId,
+  const markConversationAsRead = (conversationId: string) => {
+    if (!socket || !isConnected) return;
+
+    // Optimistically drop unread count in UI immediately (server will be source of truth on next fetch)
+    queryClient.setQueryData(["conversations"], (old: any) => {
+      if (!old) return old;
+      const normalize = (conv: any) =>
+        conv?._id === conversationId ? { ...conv, unreadCount: 0 } : conv;
+
+      if (Array.isArray(old)) return old.map(normalize);
+      // Some screens wrap single conversation as an object
+      return normalize(old);
     });
+
+    socket.emit("markConversationAsRead", { thread_id: conversationId });
+    // Backup refresh in case server calculates additional fields
+    queryClient.invalidateQueries({ queryKey: ["conversations"] });
   };
 
   const sendTypingIndicator = (
@@ -381,6 +420,7 @@ export const SocketProvider: React.FC<{ children: React.ReactNode }> = ({
         isConnected,
         sendMessage,
         markMessageAsRead,
+        markConversationAsRead,
         sendTypingIndicator,
       }}
     >
