@@ -1,5 +1,8 @@
 import { sendRequest } from "../utils/sendRequests";
-import type { StartConversationData, GetMessagesParams } from "../types/conversation";
+import type {
+  StartConversationData,
+  GetMessagesParams,
+} from "../types/conversation";
 
 // Start or get existing conversation
 export const startConversation = async (data: StartConversationData) => {
@@ -11,7 +14,7 @@ export const startConversation = async (data: StartConversationData) => {
     });
     return response.data.data;
   } catch (error) {
-    console.log(`Conversation Service [startConversation] error: ${error}`);
+    console.error(`Conversation Service [startConversation] error: ${error}`);
     throw error;
   }
 };
@@ -25,32 +28,42 @@ export const getMyConversations = async () => {
     });
     return response.data.data;
   } catch (error) {
-    console.log(`Conversation Service [getMyConversations] error: ${error}`);
+    console.error(`Conversation Service [getMyConversations] error: ${error}`);
     throw error;
   }
 };
 
 // Get messages for a conversation
-export const getConversationMessages = async (conversationId: string, params?: GetMessagesParams) => {
+export const getConversationMessages = async (
+  conversationId: string,
+  params?: GetMessagesParams,
+) => {
   try {
     const queryParams = new URLSearchParams();
     if (params?.skip) queryParams.append("skip", params.skip.toString());
     if (params?.limit) queryParams.append("limit", params.limit.toString());
-    const url = queryParams.toString() ? `/conversations/${conversationId}/messages?${queryParams.toString()}` : `/conversations/${conversationId}/messages`;
-    
+    const url = queryParams.toString()
+      ? `/conversations/${conversationId}/messages?${queryParams.toString()}`
+      : `/conversations/${conversationId}/messages`;
+
     const response = await sendRequest({
       method: "GET",
       url,
     });
     return response.data.data;
   } catch (error) {
-    console.log(`Conversation Service [getConversationMessages] error: ${error}`);
+    console.error(
+      `Conversation Service [getConversationMessages] error: ${error}`,
+    );
     throw error;
   }
 };
 
 // Delete a single message
-export const deleteMessage = async (conversationId: string, messageId: string) => {
+export const deleteMessage = async (
+  conversationId: string,
+  messageId: string,
+) => {
   try {
     const response = await sendRequest({
       method: "DELETE",
@@ -58,7 +71,7 @@ export const deleteMessage = async (conversationId: string, messageId: string) =
     });
     return response.data.data;
   } catch (error) {
-    console.log(`Conversation Service [deleteMessage] error: ${error}`);
+    console.error(`Conversation Service [deleteMessage] error: ${error}`);
     throw error;
   }
 };
@@ -72,8 +85,7 @@ export const deleteConversation = async (conversationId: string) => {
     });
     return response.data.data;
   } catch (error) {
-    console.log(`Conversation Service [deleteConversation] error: ${error}`);
+    console.error(`Conversation Service [deleteConversation] error: ${error}`);
     throw error;
   }
 };
-
