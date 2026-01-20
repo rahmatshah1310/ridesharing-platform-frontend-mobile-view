@@ -9,6 +9,34 @@ import { io, Socket } from "socket.io-client";
 import { useUser } from "./UserContext";
 import { toast } from "react-toastify";
 import { useQueryClient } from "@tanstack/react-query";
+import type {
+  RideNewEventData,
+  RideCancelledEventData,
+  RideStatusUpdatedEventData,
+  RideRequestNewEventData,
+  RideRequestSpecificEventData,
+  RideRequestOfferedEventData,
+  RideRequestOfferAcceptedEventData,
+  RideRequestCancelledEventData,
+  RideRequestDriverResponseEventData,
+  RideRequestPassengerResponseEventData,
+  RideRequestUpdateEventData,
+  ReceiveMessageEventData,
+  ConversationReadEventData,
+  UserTypingEventData,
+  UserOnlineEventData,
+  UserOfflineEventData,
+  MessageDeletedEventData,
+  ConversationDeletedEventData,
+  DriverApprovedEventData,
+  DriverRejectedEventData,
+  DriverReverificationRequiredEventData,
+  AdminDriverApprovedEventData,
+  AdminDriverRejectedEventData,
+  AdminDriverUpdatedSensitiveEventData,
+  SocketErrorEventData,
+  SocketEmitResponse,
+} from "../types/socketEvents";
 
 interface SocketContextType {
   socket: Socket | null;
@@ -20,7 +48,11 @@ interface SocketContextType {
   ) => void;
   markMessageAsRead: (messageId: string) => void;
   markConversationAsRead: (conversationId: string) => void;
-  sendTypingIndicator: (receiverId: string, threadId: string, isTyping: boolean) => void;
+  sendTypingIndicator: (
+    receiverId: string,
+    threadId: string,
+    isTyping: boolean,
+  ) => void;
 }
 
 const SocketContext = createContext<SocketContextType>({
@@ -112,7 +144,7 @@ export const SocketProvider: React.FC<{ children: React.ReactNode }> = ({
 
     // ========== RIDE EVENTS ==========
     // New ride created (for passengers)
-    newSocket.on("ride:new", (data: any) => {
+    newSocket.on("ride:new", (data: RideNewEventData) => {
       toast.info(`New ride available: ${data.from} → ${data.to}`);
       queryClient.invalidateQueries({ queryKey: ["rides"] });
       queryClient.invalidateQueries({
@@ -121,7 +153,7 @@ export const SocketProvider: React.FC<{ children: React.ReactNode }> = ({
     });
 
     // Ride cancelled
-    newSocket.on("ride:cancelled", (data: any) => {
+    newSocket.on("ride:cancelled", (data: RideCancelledEventData) => {
       toast.warning(
         `Ride cancelled: ${data.cancellationReason || "No reason provided"}`,
       );
@@ -131,7 +163,7 @@ export const SocketProvider: React.FC<{ children: React.ReactNode }> = ({
     });
 
     // Ride status updated
-    newSocket.on("ride:status:updated", (data: any) => {
+    newSocket.on("ride:status:updated", (data: RideStatusUpdatedEventData) => {
       toast.info(`Ride status updated: ${data.status}`);
       queryClient.invalidateQueries({ queryKey: ["rides"] });
       queryClient.invalidateQueries({ queryKey: ["ride", data.id] });
@@ -140,7 +172,7 @@ export const SocketProvider: React.FC<{ children: React.ReactNode }> = ({
 
     // ========== RIDE REQUEST EVENTS ==========
     // New ride request (for drivers)
-    newSocket.on("ride:request:new", (data: any) => {
+    newSocket.on("ride:request:new", (data: RideRequestNewEventData) => {
       toast.info(`New ride request: ${data.from} → ${data.to}`);
       queryClient.invalidateQueries({
         queryKey: ["rideRequests", "driver", "open"],
@@ -148,59 +180,78 @@ export const SocketProvider: React.FC<{ children: React.ReactNode }> = ({
     });
 
     // Ride request for specific ride (for driver)
-    newSocket.on("ride:request:specific", (data: any) => {
-      toast.info(`Someone requested a seat on your ride`);
-      queryClient.invalidateQueries({ queryKey: ["rideRequests"] });
-      queryClient.invalidateQueries({ queryKey: ["rides"] });
-    });
+    newSocket.on(
+      "ride:request:specific",
+      (_data: RideRequestSpecificEventData) => {
+        toast.info(`Someone requested a seat on your ride`);
+        queryClient.invalidateQueries({ queryKey: ["rideRequests"] });
+        queryClient.invalidateQueries({ queryKey: ["rides"] });
+      },
+    );
 
     // Driver offered a ride to request (for passenger)
-    newSocket.on("ride:request:offered", (data: any) => {
-      toast.success(`Driver offered a ride for your request`);
-      queryClient.invalidateQueries({ queryKey: ["rideRequests"] });
-      queryClient.invalidateQueries({
-        queryKey: ["rideRequest", data.requestId],
-      });
-    });
+    newSocket.on(
+      "ride:request:offered",
+      (data: RideRequestOfferedEventData) => {
+        toast.success(`Driver offered a ride for your request`);
+        queryClient.invalidateQueries({ queryKey: ["rideRequests"] });
+        queryClient.invalidateQueries({
+          queryKey: ["rideRequest", data.requestId],
+        });
+      },
+    );
 
     // Offer accepted (for driver)
-    newSocket.on("ride:request:offerAccepted", (data: any) => {
-      toast.success(`Your offer was accepted!`);
-      queryClient.invalidateQueries({ queryKey: ["rideRequests"] });
-      queryClient.invalidateQueries({ queryKey: ["driverOffers"] });
-      queryClient.invalidateQueries({ queryKey: ["rides"] });
-    });
+    newSocket.on(
+      "ride:request:offerAccepted",
+      (_data: RideRequestOfferAcceptedEventData) => {
+        toast.success(`Your offer was accepted!`);
+        queryClient.invalidateQueries({ queryKey: ["rideRequests"] });
+        queryClient.invalidateQueries({ queryKey: ["driverOffers"] });
+        queryClient.invalidateQueries({ queryKey: ["rides"] });
+      },
+    );
 
     // Ride request cancelled
-    newSocket.on("ride:request:cancelled", (data: any) => {
-      toast.warning(`Ride request cancelled`);
-      queryClient.invalidateQueries({ queryKey: ["rideRequests"] });
-    });
+    newSocket.on(
+      "ride:request:cancelled",
+      (_data: RideRequestCancelledEventData) => {
+        toast.warning(`Ride request cancelled`);
+        queryClient.invalidateQueries({ queryKey: ["rideRequests"] });
+      },
+    );
 
     // Driver response to ride request (for passenger)
-    newSocket.on("ride:request:driverResponse", (data: any) => {
-      if (data.accept) {
-        toast.success(`Driver accepted your ride request!`);
-      } else {
-        toast.info(`Driver declined your ride request`);
-      }
-      queryClient.invalidateQueries({ queryKey: ["rideRequests"] });
-      queryClient.invalidateQueries({ queryKey: ["rideRequest", data.id] });
-    });
+    newSocket.on(
+      "ride:request:driverResponse",
+      (data: RideRequestDriverResponseEventData) => {
+        if (data.accept) {
+          toast.success(`Driver accepted your ride request!`);
+        } else {
+          toast.info(`Driver declined your ride request`);
+        }
+        queryClient.invalidateQueries({ queryKey: ["rideRequests"] });
+        queryClient.invalidateQueries({ queryKey: ["rideRequest", data.id] });
+      },
+    );
 
     // Passenger response to ride request (for driver)
-    newSocket.on("ride:request:passengerResponse", (data: any) => {
-      if (data.accept) {
-        toast.success(`Passenger accepted your ride request!`);
-      } else {
-        toast.info(`Passenger declined your ride request`);
-      }
-      queryClient.invalidateQueries({ queryKey: ["rideRequests"] });
-      queryClient.invalidateQueries({ queryKey: ["rideRequest", data.id] });
-    });
+    newSocket.on(
+      "ride:request:passengerResponse",
+      (data: RideRequestPassengerResponseEventData) => {
+        if (data.accept) {
+          toast.success(`Passenger accepted your ride request!`);
+        } else {
+          toast.info(`Passenger declined your ride request`);
+        }
+        queryClient.invalidateQueries({ queryKey: ["rideRequests"] });
+        queryClient.invalidateQueries({ queryKey: ["rideRequest", data.id] });
+      },
+    );
 
     // Ride request update
-    newSocket.on("ride:request:update", (data: any) => {
+    newSocket.on("ride:request:update", (data: RideRequestUpdateEventData) => {
+      toast.info(`Ride request updated`);
       queryClient.invalidateQueries({ queryKey: ["rideRequests"] });
       queryClient.invalidateQueries({
         queryKey: ["rideRequest", data.requestId || data.id],
@@ -209,7 +260,8 @@ export const SocketProvider: React.FC<{ children: React.ReactNode }> = ({
 
     // ========== MESSAGE EVENTS ==========
     // Receive new message
-    newSocket.on("receiveMessage", (data: any) => {
+    newSocket.on("receiveMessage", (data: ReceiveMessageEventData) => {
+      toast.info(`New message from ${data.senderName}`);
       queryClient.invalidateQueries({
         queryKey: ["conversation", data.conversation, "messages"],
       });
@@ -224,7 +276,7 @@ export const SocketProvider: React.FC<{ children: React.ReactNode }> = ({
     //   queryClient.invalidateQueries({ queryKey: ["conversations"] });
     // });
 
-    newSocket.on("conversationRead", (data: any) => {
+    newSocket.on("conversationRead", (data: ConversationReadEventData) => {
       queryClient.invalidateQueries({ queryKey: ["conversations"] });
 
       // Optional: if you're on that conversation screen, refresh messages too
@@ -236,24 +288,24 @@ export const SocketProvider: React.FC<{ children: React.ReactNode }> = ({
     });
 
     // User typing indicator
-    newSocket.on("userTyping", (data: any) => {
+    newSocket.on("userTyping", (data: UserTypingEventData) => {
       console.log("User typing:", data);
       // Handle typing indicator in chat component
     });
 
     // User online/offline
-    newSocket.on("userOnline", (data: any) => {
+    newSocket.on("userOnline", (data: UserOnlineEventData) => {
       console.log("User online:", data);
       // Could update user status in UI if needed
     });
 
-    newSocket.on("userOffline", (data: any) => {
+    newSocket.on("userOffline", (data: UserOfflineEventData) => {
       console.log("User offline:", data);
       // Could update user status in UI if needed
     });
 
     // Message deleted
-    newSocket.on("message:deleted", (data: any) => {
+    newSocket.on("message:deleted", (data: MessageDeletedEventData) => {
       // Invalidate conversation messages and conversations list
       queryClient.invalidateQueries({
         queryKey: ["conversation", data.conversationId, "messages"],
@@ -262,54 +314,69 @@ export const SocketProvider: React.FC<{ children: React.ReactNode }> = ({
     });
 
     // Conversation deleted
-    newSocket.on("conversation:deleted", (data: any) => {
-      // Remove conversation from cache
-      queryClient.removeQueries({
-        queryKey: ["conversation", data.conversationId],
-      });
-      // Invalidate conversations list
-      queryClient.invalidateQueries({ queryKey: ["conversations"] });
-    });
+    newSocket.on(
+      "conversation:deleted",
+      (data: ConversationDeletedEventData) => {
+        // Remove conversation from cache
+        queryClient.removeQueries({
+          queryKey: ["conversation", data.conversationId],
+        });
+        // Invalidate conversations list
+        queryClient.invalidateQueries({ queryKey: ["conversations"] });
+      },
+    );
 
     // ========== DRIVER APPROVAL EVENTS ==========
-    newSocket.on("driver:approved", (data: any) => {
+    newSocket.on("driver:approved", (_data: DriverApprovedEventData) => {
       toast.success("Your driver account has been approved!");
       queryClient.invalidateQueries({ queryKey: ["user"] });
       queryClient.invalidateQueries({ queryKey: ["rides"] });
     });
 
-    newSocket.on("driver:rejected", (data: any) => {
+    newSocket.on("driver:rejected", (_data: DriverRejectedEventData) => {
       toast.error(
         "Your driver account application was rejected. Please contact support.",
       );
       queryClient.invalidateQueries({ queryKey: ["user"] });
     });
 
-    newSocket.on("driver:reverification:required", (data: any) => {
-      toast.warning(
-        "Driver reverification required. Please update your information.",
-      );
-      queryClient.invalidateQueries({ queryKey: ["user"] });
-    });
+    newSocket.on(
+      "driver:reverification:required",
+      (_data: DriverReverificationRequiredEventData) => {
+        toast.warning(
+          "Driver reverification required. Please update your information.",
+        );
+        queryClient.invalidateQueries({ queryKey: ["user"] });
+      },
+    );
 
     // ========== ADMIN EVENTS (for admin users) ==========
-    newSocket.on("admin:driver:approved", (data: any) => {
-      console.log("Admin: Driver approved:", data);
-      // Admin notification - could show in admin panel
-    });
+    newSocket.on(
+      "admin:driver:approved",
+      (data: AdminDriverApprovedEventData) => {
+        console.log("Admin: Driver approved:", data);
+        // Admin notification - could show in admin panel
+      },
+    );
 
-    newSocket.on("admin:driver:rejected", (data: any) => {
-      console.log("Admin: Driver rejected:", data);
-      // Admin notification - could show in admin panel
-    });
+    newSocket.on(
+      "admin:driver:rejected",
+      (data: AdminDriverRejectedEventData) => {
+        console.log("Admin: Driver rejected:", data);
+        // Admin notification - could show in admin panel
+      },
+    );
 
-    newSocket.on("admin:driver:updated-sensitive", (data: any) => {
-      console.log("Admin: Driver sensitive info updated:", data);
-      // Admin notification - could show in admin panel
-    });
+    newSocket.on(
+      "admin:driver:updated-sensitive",
+      (data: AdminDriverUpdatedSensitiveEventData) => {
+        console.log("Admin: Driver sensitive info updated:", data);
+        // Admin notification - could show in admin panel
+      },
+    );
 
     // ========== ERROR HANDLING ==========
-    newSocket.on("error", (data: any) => {
+    newSocket.on("error", (data: SocketErrorEventData) => {
       console.error("Socket error:", data);
       toast.error(data.message || "An error occurred");
     });
@@ -341,7 +408,7 @@ export const SocketProvider: React.FC<{ children: React.ReactNode }> = ({
         receiver_id: receiverId,
         message: message.trim(),
       },
-      (response: any) => {
+      (response: SocketEmitResponse) => {
         if (response?.status === "error") {
           toast.error(response.message || "Failed to send message");
         }
