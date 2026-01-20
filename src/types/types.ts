@@ -4,3 +4,4 @@ export * from "./user";
 export * from "./rides";
 export * from "./riderequest";
 export * from "./conversation";
+export * from "./socketEvents";
