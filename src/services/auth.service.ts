@@ -9,7 +9,7 @@ export const signUp = async (data: unknown) => {
     });
     return response.data.data;
   } catch (error) {
-    console.log(`Auth Service [signUp] error: ${error}`);
+    console.error(`Auth Service [signUp] error: ${error}`);
     throw error;
   }
 };
@@ -23,7 +23,7 @@ export const login = async (data: unknown) => {
     });
     return response.data.data;
   } catch (error) {
-    console.log(`Auth Service [login] error: ${error}`);
+    console.error(`Auth Service [login] error: ${error}`);
     throw error;
   }
 };
@@ -37,7 +37,7 @@ export const me = async (config?: any) => {
     });
     return response.data;
   } catch (error) {
-    console.log(`Auth Service [me] error: ${error}`);
+    console.error(`Auth Service [me] error: ${error}`);
     throw error;
   }
 };
