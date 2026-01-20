@@ -37,6 +37,7 @@ import type {
   SocketErrorEventData,
   SocketEmitResponse,
 } from "../types/socketEvents";
+import { data } from "react-router-dom";
 
 interface SocketContextType {
   socket: Socket | null;
@@ -183,7 +184,7 @@ export const SocketProvider: React.FC<{ children: React.ReactNode }> = ({
     newSocket.on(
       "ride:request:specific",
       (_data: RideRequestSpecificEventData) => {
-        toast.info(`Someone requested a seat on your ride`);
+        toast.info(`Someone requested a seat on your ride`,{data});
         queryClient.invalidateQueries({ queryKey: ["rideRequests"] });
         queryClient.invalidateQueries({ queryKey: ["rides"] });
       },
@@ -261,7 +262,8 @@ export const SocketProvider: React.FC<{ children: React.ReactNode }> = ({
     // ========== MESSAGE EVENTS ==========
     // Receive new message
     newSocket.on("receiveMessage", (data: ReceiveMessageEventData) => {
-      toast.info(`New message from ${data.senderName}`);
+      console.log("data",data);
+      // toast.info(`New message from ${data.name}`);
       queryClient.invalidateQueries({
         queryKey: ["conversation", data.conversation, "messages"],
       });
