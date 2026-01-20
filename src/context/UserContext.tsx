@@ -89,7 +89,6 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children
       });
 
       const meUser = res?.data as User | undefined;
-      console.log(meUser);
       if (meUser) {
         setUserData(meUser);
         localStorage.setItem("userData", JSON.stringify(meUser));
