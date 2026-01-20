@@ -18,7 +18,7 @@ export const createRide = async (data: CreateRideData) => {
     });
     return response.data.data;
   } catch (error) {
-    console.log(`Rides Service [createRide] error: ${error}`);
+    console.error(`Rides Service [createRide] error: ${error}`);
     throw error;
   }
 };
@@ -40,7 +40,7 @@ export const getRides = async (params?: GetRidesParams) => {
     });
     return response.data.data;
   } catch (error) {
-    console.log(`Rides Service [getRides] error: ${error}`);
+    console.error(`Rides Service [getRides] error: ${error}`);
     throw error;
   }
 };
@@ -54,7 +54,7 @@ export const getRideById = async (id: string) => {
     });
     return response.data.data;
   } catch (error) {
-    console.log(`Rides Service [getRideById] error: ${error}`);
+    console.error(`Rides Service [getRideById] error: ${error}`);
     throw error;
   }
 };
@@ -69,7 +69,7 @@ export const updateRide = async (id: string, data: UpdateRideData) => {
     });
     return response.data.data;
   } catch (error) {
-    console.log(`Rides Service [updateRide] error: ${error}`);
+    console.error(`Rides Service [updateRide] error: ${error}`);
     throw error;
   }
 };
@@ -83,7 +83,7 @@ export const deleteRide = async (id: string) => {
     });
     return response.data.data;
   } catch (error) {
-    console.log(`Rides Service [deleteRide] error: ${error}`);
+    console.error(`Rides Service [deleteRide] error: ${error}`);
     throw error;
   }
 };
@@ -98,7 +98,7 @@ export const cancelRide = async (id: string, data: CancelRideData) => {
     });
     return response.data.data;
   } catch (error) {
-    console.log(`Rides Service [cancelRide] error: ${error}`);
+    console.error(`Rides Service [cancelRide] error: ${error}`);
     throw error;
   }
 };
@@ -116,7 +116,7 @@ export const updateRideStatus = async (
     });
     return response.data.data;
   } catch (error) {
-    console.log(`Rides Service [updateRideStatus] error: ${error}`);
+    console.error(`Rides Service [updateRideStatus] error: ${error}`);
     throw error;
   }
 };
@@ -130,7 +130,7 @@ export const getDriverRides = async () => {
     });
     return response.data.data;
   } catch (error) {
-    console.log(`Rides Service [getDriverRides] error: ${error}`);
+    console.error(`Rides Service [getDriverRides] error: ${error}`);
     throw error;
   }
 };
@@ -144,7 +144,7 @@ export const getDriverCurrentRide = async () => {
     });
     return response.data.data;
   } catch (error) {
-    console.log(`Rides Service [getDriverCurrentRide] error: ${error}`);
+    console.error(`Rides Service [getDriverCurrentRide] error: ${error}`);
     throw error;
   }
 };
@@ -158,7 +158,7 @@ export const getDriverPastRides = async () => {
     });
     return response.data.data;
   } catch (error) {
-    console.log(`Rides Service [getDriverPastRides] error: ${error}`);
+    console.error(`Rides Service [getDriverPastRides] error: ${error}`);
     throw error;
   }
 };
@@ -172,7 +172,7 @@ export const getDriverUpcomingRides = async () => {
     });
     return response.data.data;
   } catch (error) {
-    console.log(`Rides Service [getDriverUpcomingRides] error: ${error}`);
+    console.error(`Rides Service [getDriverUpcomingRides] error: ${error}`);
     throw error;
   }
 };
@@ -186,7 +186,7 @@ export const getPassengerUpcomingRides = async () => {
     });
     return response.data.data;
   } catch (error) {
-    console.log(`Rides Service [getPassengerUpcomingRides] error: ${error}`);
+    console.error(`Rides Service [getPassengerUpcomingRides] error: ${error}`);
     throw error;
   }
 };
@@ -200,7 +200,7 @@ export const ratingPassengerToDriver = async (id: string, data: RatingData) => {
     });
     return response.data.data;
   } catch (error) {
-    console.log(`Rides Service [ratingPassengerToDriver] error: ${error}`);
+    console.error(`Rides Service [ratingPassengerToDriver] error: ${error}`);
     throw error;
   }
 };
@@ -214,7 +214,7 @@ export const ratingDriverToPassenger = async (id: string, data: RatingData) => {
     });
     return response.data.data;
   } catch (error) {
-    console.log(`Rides Service [ratingDriverToPassenger] error: ${error}`);
+    console.error(`Rides Service [ratingDriverToPassenger] error: ${error}`);
     throw error;
   }
 };
@@ -227,7 +227,7 @@ export const getRatingByUserId = async (id: string) => {
     });
     return response.data.data;
   } catch (error) {
-    console.log(`Rides Service [getRatingByUserId] error: ${error}`);
+    console.error(`Rides Service [getRatingByUserId] error: ${error}`);
     throw error;
   }
 };
@@ -240,7 +240,7 @@ export const getGivenRatings = async () => {
     });
     return response.data.data;
   } catch (error) {
-    console.log(`Rides Service [getGivenRatings] error: ${error}`);
+    console.error(`Rides Service [getGivenRatings] error: ${error}`);
     throw error;
   }
 };
