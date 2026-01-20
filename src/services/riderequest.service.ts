@@ -16,7 +16,7 @@ export const createRideRequest = async (data: CreateRideRequestData) => {
     });
     return response.data.data;
   } catch (error) {
-    console.log(`RideRequest Service [createRideRequest] error: ${error}`);
+    console.error(`RideRequest Service [createRideRequest] error: ${error}`);
     throw error;
   }
 };
@@ -34,7 +34,7 @@ export const requestSpecificRide = async (
     });
     return response.data.data;
   } catch (error) {
-    console.log(`RideRequest Service [requestSpecificRide] error: ${error}`);
+    console.error(`RideRequest Service [requestSpecificRide] error: ${error}`);
     throw error;
   }
 };
@@ -48,7 +48,7 @@ export const getRideRequestById = async (id: string) => {
     });
     return response.data.data;
   } catch (error) {
-    console.log(`RideRequest Service [getRideRequestById] error: ${error}`);
+    console.error(`RideRequest Service [getRideRequestById] error: ${error}`);
     throw error;
   }
 };
@@ -66,7 +66,7 @@ export const cancelRideRequest = async (
     });
     return response.data.data;
   } catch (error) {
-    console.log(`RideRequest Service [cancelRideRequest] error: ${error}`);
+    console.error(`RideRequest Service [cancelRideRequest] error: ${error}`);
     throw error;
   }
 };
@@ -80,7 +80,9 @@ export const getDriverRideRequests = async () => {
     });
     return response.data.data;
   } catch (error) {
-    console.log(`RideRequest Service [getDriverRideRequests] error: ${error}`);
+    console.error(
+      `RideRequest Service [getDriverRideRequests] error: ${error}`,
+    );
     throw error;
   }
 };
@@ -94,7 +96,7 @@ export const getPassengerRideRequests = async () => {
     });
     return response.data.data;
   } catch (error) {
-    console.log(
+    console.error(
       `RideRequest Service [getPassengerRideRequests] error: ${error}`,
     );
     throw error;
@@ -110,7 +112,7 @@ export const getPassengerPastRideRequests = async () => {
     });
     return response.data.data;
   } catch (error) {
-    console.log(
+    console.error(
       `RideRequest Service [getPassengerPastRideRequests] error: ${error}`,
     );
     throw error;
@@ -126,7 +128,7 @@ export const getPassengerUpcomingRideRequests = async () => {
     });
     return response.data.data;
   } catch (error) {
-    console.log(
+    console.error(
       `RideRequest Service [getPassengerUpcomingRideRequests] error: ${error}`,
     );
     throw error;
@@ -142,7 +144,7 @@ export const getPassengerCurrentRideRequests = async () => {
     });
     return response.data.data;
   } catch (error) {
-    console.log(
+    console.error(
       `RideRequest Service [getPassengerCurrentRideRequests] error: ${error}`,
     );
     throw error;
@@ -158,7 +160,9 @@ export const getRideRequestsByRide = async (rideId: string) => {
     });
     return response.data.data;
   } catch (error) {
-    console.log(`RideRequest Service [getRideRequestsByRide] error: ${error}`);
+    console.error(
+      `RideRequest Service [getRideRequestsByRide] error: ${error}`,
+    );
     throw error;
   }
 };
@@ -176,7 +180,7 @@ export const offerRideToRequest = async (
     });
     return response.data.data;
   } catch (error) {
-    console.log(`RideRequest Service [offerRideToRequest] error: ${error}`);
+    console.error(`RideRequest Service [offerRideToRequest] error: ${error}`);
     throw error;
   }
 };
@@ -190,7 +194,7 @@ export const getDriverOffers = async () => {
     });
     return response.data.data;
   } catch (error) {
-    console.log(`RideRequest Service [getDriverOffers] error: ${error}`);
+    console.error(`RideRequest Service [getDriverOffers] error: ${error}`);
     throw error;
   }
 };
@@ -204,7 +208,7 @@ export const acceptOffer = async (requestId: string, offerId: string) => {
     });
     return response.data.data;
   } catch (error) {
-    console.log(`RideRequest Service [acceptOffer] error: ${error}`);
+    console.error(`RideRequest Service [acceptOffer] error: ${error}`);
     throw error;
   }
 };
@@ -218,7 +222,7 @@ export const getOpenRideRequestsForDriver = async () => {
     });
     return response.data.data;
   } catch (error) {
-    console.log(
+    console.error(
       `RideRequest Service [getOpenRideRequestsForDriver] error: ${error}`,
     );
     throw error;
@@ -234,7 +238,7 @@ export const getPastRideRequestsForDriver = async () => {
     });
     return response.data.data;
   } catch (error) {
-    console.log(
+    console.error(
       `RideRequest Service [getPastRideRequestsForDriver] error: ${error}`,
     );
     throw error;
@@ -250,7 +254,7 @@ export const getUpcomingRideRequestsForDriver = async () => {
     });
     return response.data.data;
   } catch (error) {
-    console.log(
+    console.error(
       `RideRequest Service [getUpcomingRideRequestsForDriver] error: ${error}`,
     );
     throw error;
