@@ -50,7 +50,6 @@ const RegisterDriver: React.FC = () => {
   }, [signupMutation.status]);
 
   const onSubmitDriverForm: SubmitHandler<RegisterDriverFormValues> = async (values) => {
-    console.log("SUBMIT VALUES:", values);
     try {
       const formData = new FormData();
       formData.append("name", values.name);
