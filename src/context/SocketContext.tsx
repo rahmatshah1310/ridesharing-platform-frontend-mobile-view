@@ -184,7 +184,7 @@ export const SocketProvider: React.FC<{ children: React.ReactNode }> = ({
     newSocket.on(
       "ride:request:specific",
       (_data: RideRequestSpecificEventData) => {
-        toast.info(`Someone requested a seat on your ride`,{data});
+        toast.info(`Someone requested a seat on your ride`, { data });
         queryClient.invalidateQueries({ queryKey: ["rideRequests"] });
         queryClient.invalidateQueries({ queryKey: ["rides"] });
       },
@@ -206,7 +206,7 @@ export const SocketProvider: React.FC<{ children: React.ReactNode }> = ({
     newSocket.on(
       "ride:request:offerAccepted",
       (_data: RideRequestOfferAcceptedEventData) => {
-        toast.success(`Your offer was accepted!`);
+        toast.success(`Your offer was accepted! ${_data}`);
         queryClient.invalidateQueries({ queryKey: ["rideRequests"] });
         queryClient.invalidateQueries({ queryKey: ["driverOffers"] });
         queryClient.invalidateQueries({ queryKey: ["rides"] });
@@ -217,7 +217,7 @@ export const SocketProvider: React.FC<{ children: React.ReactNode }> = ({
     newSocket.on(
       "ride:request:cancelled",
       (_data: RideRequestCancelledEventData) => {
-        toast.warning(`Ride request cancelled`);
+        toast.warning(`Ride request cancelled ${_data}`);
         queryClient.invalidateQueries({ queryKey: ["rideRequests"] });
       },
     );
@@ -262,7 +262,7 @@ export const SocketProvider: React.FC<{ children: React.ReactNode }> = ({
     // ========== MESSAGE EVENTS ==========
     // Receive new message
     newSocket.on("receiveMessage", (data: ReceiveMessageEventData) => {
-      console.log("data",data);
+      console.log("data", data);
       // toast.info(`New message from ${data.name}`);
       queryClient.invalidateQueries({
         queryKey: ["conversation", data.conversation, "messages"],
